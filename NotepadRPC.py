@@ -1,4 +1,4 @@
-print("Starting NotepadRPC.py 0.1")
+print("Starting NotepadRPC.py 0.2")
 import os
 import sys
 import time
@@ -80,33 +80,48 @@ def get_np():
         if each[-12:] == " - Notepad++":
             return each[:-12]
 rpc = pypresence.Presence(config["clientid"])
-rpc.connect()
+if get_np() != None:
+    rpc.connect()
+    status = 1
+else:
+    status = 0
 while True:
     try:
-        if "file" not in globals() or file != get_np():
-            t = calendar.timegm(datetime.utcnow().utctimetuple())
-            file = get_np()
-        if file != None and not file.startswith("new") and not file.startswith("*new") and (os.path.isfile(file) or os.path.isfile(file[1:])):
-            try: size = os.path.getsize(file) if file[0] != "*" else os.path.getsize(file[1:])
-            except: size_t = None
-            else:
-                if size <= 1024:
-                    size_t = str(size)+" bytes"
-                elif size < 1024*1024:
-                    size_t = str(size/1024).split(".")[0]+("."+str(size/1024).split(".")[1][:2] if str(size/1024).split(".")[1] != "0" else "")+" kilobytes"
-                elif size < 1024*1024:
-                    size_t = str(size/(1024*1024)).split(".")[0]+("."+str(size/(1024*1024)).split(".")[1][:2] if str(size/(1024*1024)).split(".")[1] != "0" else "")+" megabytes"
+        if status == 1:
+            if get_np() == None:
+                rpc.close()
+                status = 0
+                if "file" in globals():
+                    del file
+                continue
+            if "file" not in globals() or file != get_np():
+                t = calendar.timegm(datetime.utcnow().utctimetuple())
+                file = get_np()
+            if file != None and not file.startswith("new") and not file.startswith("*new") and (os.path.isfile(file) or os.path.isfile(file[1:])):
+                try: size = os.path.getsize(file) if file[0] != "*" else os.path.getsize(file[1:])
+                except: size_t = None
                 else:
-                    size_t = str(size/(1024*1024*1024)).split(".")[0]+("."+str(size/(1024*1024*1024)).split(".")[1][:2] if str(size/(1024*1024*1024)).split(".")[1] != "0" else "")+" gigabytes"
-        else:
-            size_t = None
-        rpc.update(details="Editing "+file.split("\\")[-1] if file != None else "Idling",
-                   state=size_t,
-                   large_image="image_large",
-                   large_text="Notepad++",
-                   small_image=("image_"+file.split("\\")[-1].split(".")[-1]) if file != None and "." in file.split("\\")[-1] else None,
-                   small_text=ext[file.split("\\")[-1].split(".")[-1]] if file != None and "." in file.split("\\")[-1] and file.split("\\")[-1].split(".")[-1] in ext else None,
-                   start=t if file != None else None)
+                    if size <= 1024:
+                        size_t = str(size)+" bytes"
+                    elif size < 1024*1024:
+                        size_t = str(size/1024).split(".")[0]+("."+str(size/1024).split(".")[1][:2] if str(size/1024).split(".")[1] != "0" else "")+" kilobytes"
+                    elif size < 1024*1024*1024:
+                        size_t = str(size/(1024*1024)).split(".")[0]+("."+str(size/(1024*1024)).split(".")[1][:2] if str(size/(1024*1024)).split(".")[1] != "0" else "")+" megabytes"
+                    else:
+                        size_t = str(size/(1024*1024*1024)).split(".")[0]+("."+str(size/(1024*1024*1024)).split(".")[1][:2] if str(size/(1024*1024*1024)).split(".")[1] != "0" else "")+" gigabytes"
+            else:
+                size_t = None
+            rpc.update(details="Editing "+file.split("\\")[-1] if file != None else "Idling",
+                       state=size_t,
+                       large_image="image_large",
+                       large_text="Notepad++",
+                       small_image=("image_"+file.split("\\")[-1].split(".")[-1]) if file != None and "." in file.split("\\")[-1] else None,
+                       small_text=ext[file.split("\\")[-1].split(".")[-1]] if file != None and "." in file.split("\\")[-1] and file.split("\\")[-1].split(".")[-1] in ext else None,
+                       start=t if file != None else None)
+        elif get_np() != None:
+            rpc = pypresence.Presence(config["clientid"])
+            rpc.connect()
+            status = 1
     except pypresence.exceptions.InvalidID:
         print("Invalid ClientID")
         time.sleep(5)
