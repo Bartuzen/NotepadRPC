@@ -1,4 +1,4 @@
-print("Starting NotepadRPC.py 0.2")
+print("Starting NotepadRPC.py 0.3")
 import os
 import sys
 import time
@@ -88,16 +88,17 @@ else:
 while True:
     try:
         if status == 1:
-            if get_np() == None:
+            np = get_np()
+            if np == None:
                 rpc.close()
                 status = 0
                 if "file" in globals():
                     del file
                 continue
-            if "file" not in globals() or file != get_np():
+            if "file" not in globals() or (file if not file.startswith("*") else file[1:]) != (np if not np.startswith("*") else np[1:]):
                 t = calendar.timegm(datetime.utcnow().utctimetuple())
                 file = get_np()
-            if file != None and not file.startswith("new") and not file.startswith("*new") and (os.path.isfile(file) or os.path.isfile(file[1:])):
+            if not file.startswith("new") and not file.startswith("*new") and (os.path.isfile(file) or os.path.isfile(file[1:])):
                 try: size = os.path.getsize(file) if file[0] != "*" else os.path.getsize(file[1:])
                 except: size_t = None
                 else:
@@ -111,13 +112,13 @@ while True:
                         size_t = str(size/(1024*1024*1024)).split(".")[0]+("."+str(size/(1024*1024*1024)).split(".")[1][:2] if str(size/(1024*1024*1024)).split(".")[1] != "0" else "")+" gigabytes"
             else:
                 size_t = None
-            rpc.update(details="Editing "+file.split("\\")[-1] if file != None else "Idling",
+            rpc.update(details="Editing "+(file.split("\\")[-1] if not file.startswith("*new") else file[1:]),
                        state=size_t,
                        large_image="image_large",
                        large_text="Notepad++",
-                       small_image=("image_"+file.split("\\")[-1].split(".")[-1]) if file != None and "." in file.split("\\")[-1] else None,
-                       small_text=ext[file.split("\\")[-1].split(".")[-1]] if file != None and "." in file.split("\\")[-1] and file.split("\\")[-1].split(".")[-1] in ext else None,
-                       start=t if file != None else None)
+                       small_image=("image_"+file.split("\\")[-1].split(".")[-1]) if "." in file.split("\\")[-1] else None,
+                       small_text=ext[file.split("\\")[-1].split(".")[-1]] if "." in file.split("\\")[-1] and file.split("\\")[-1].split(".")[-1] in ext else None,
+                       start=t)
         elif get_np() != None:
             rpc = pypresence.Presence(config["clientid"])
             rpc.connect()
@@ -132,4 +133,4 @@ while True:
         if "start" not in globals():
             start = 1
             print("NotepadRPC.py has started successfully!")
-    time.sleep(float(str(config["sleep"])))
+    time.sleep(float(config["sleep"]))
