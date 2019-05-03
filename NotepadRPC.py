@@ -1,4 +1,4 @@
-VERSION = "0.4"
+VERSION = "0.5"
 print("Starting NotepadRPC.py " + VERSION)
 import os
 import sys
@@ -68,7 +68,7 @@ IsWindowVisible = ctypes.windll.user32.IsWindowVisible
 def get_np():
     titles = []
 
-    def foreach_window(hwnd):
+    def foreach_window(hwnd, lParam):
         if IsWindowVisible(hwnd):
             length = GetWindowTextLength(hwnd)
             buff = ctypes.create_unicode_buffer(length + 1)
