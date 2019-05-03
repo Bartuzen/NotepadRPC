@@ -1,5 +1,5 @@
-VERSION = "0.5"
-print("Starting NotepadRPC.py " + VERSION)
+VERSION = "0.6"
+print("Starting NotepadRPC " + VERSION)
 import os
 import sys
 import time
@@ -46,6 +46,14 @@ re = list()
 re.append(gen_yaml("clientId", 529306098646122516))
 re.append(gen_yaml("sleep", 1))
 re.append(gen_yaml("fileSwitchResetsTimer", True))
+re.append(gen_yaml("details", "Editing {}"))
+re.append(gen_yaml("large_image", "image_large"))
+re.append(gen_yaml("small_image", "image_{}"))
+re.append(gen_yaml("small_image", "image_{}"))
+re.append(gen_yaml("bytes", "bytes"))
+re.append(gen_yaml("kilobytes", "kilobytes"))
+re.append(gen_yaml("megabytes", "megabytes"))
+re.append(gen_yaml("gigabytes", "gigabytes"))
 if True in re:
     yaml.dump(config, open("config.yml", "w", encoding='utf8'))
 
@@ -121,19 +129,19 @@ def presence():
                 raise Exception
             size = os.path.getsize(file) if file[0] != "*" else os.path.getsize(file[1:])
             if size <= 1024:
-                size_text = str(size) + " bytes"
+                size_text = str(size) + " " + config["bytes"]
             elif size < 1024 * 1024:
-                size_text = float_format(size/1024) + " kilobytes"
+                size_text = float_format(size/1024) + " " + config["kilobytes"]
             elif size < 1024 * 1024 * 1024:
-                size_text = float_format(size/(1024*1024)) + " megabytes"
+                size_text = float_format(size/(1024*1024)) + " " + config["megabytes"]
             elif size < 1024 * 1024 * 1024:
-                size_text = float_format(size/(1024*1024*1024)) + " gigabytes"
+                size_text = float_format(size/(1024*1024*1024)) + " " + config["gigabytes"]
         except:
             size_text = None
-        rpc.update(details="Editing " + name,
+        rpc.update(details=config["details"].replace("{}", name),
                    state=size_text,
-                   large_image="image_large",
-                   small_image="image_" + extension if extension is not None else None,
+                   large_image=config["large_image"],
+                   small_image=config["small_image"].replace("{}", extension) if extension is not None else None,
                    small_text=ext[extension] if extension is not None and extension in ext else None,
                    start=started)
     elif connected:
@@ -144,10 +152,9 @@ def presence():
 try:
     presence()
 except pypresence.exceptions.InvalidID:
-    print()
-    sys.exit("Invalid clientId")
+    sys.exit("Invalid ClientID")
 else:
-    print("NotepadRPC.py has started successfully!")
+    print("NotepadRPC has started successfully!")
 while True:
     time.sleep(float(config["sleep"]))
     presence()
