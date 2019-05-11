@@ -1,4 +1,4 @@
-VERSION = "0.6"
+VERSION = "0.7"
 print("Starting NotepadRPC " + VERSION)
 import os
 import sys
@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 if len(lib) > 0:
     print("Couldn't find required libraries. Trying to install them...")
     for each in lib:
-        response = os.system('{} -m pip install -U '.format(sys.executable)+each+" -q")
+        response = os.system('{} -m pip install -U '.format(sys.executable) + each + " -q")
         if response != 0:
             sys.exit("Couldn't install " + each)
     print("Successfully installed libraries.")
@@ -48,7 +48,6 @@ re.append(gen_yaml("sleep", 1))
 re.append(gen_yaml("fileSwitchResetsTimer", True))
 re.append(gen_yaml("details", "Editing {}"))
 re.append(gen_yaml("large_image", "image_large"))
-re.append(gen_yaml("small_image", "image_{}"))
 re.append(gen_yaml("small_image", "image_{}"))
 re.append(gen_yaml("bytes", "bytes"))
 re.append(gen_yaml("kilobytes", "kilobytes"))
@@ -98,7 +97,6 @@ def float_format(number):
 
 
 connected = False
-rpc = pypresence.Presence(config["clientId"])
 
 
 def presence():
@@ -109,6 +107,7 @@ def presence():
     file = get_np()
     if file is not None:
         if not connected:
+            rpc = pypresence.Presence(config["clientId"])
             rpc.connect()
             connected = True
             started = calendar.timegm(datetime.utcnow().utctimetuple())
