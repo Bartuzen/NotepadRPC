@@ -18,7 +18,7 @@ except ModuleNotFoundError:
 if len(lib) > 0:
     print("Couldn't find required libraries. Trying to install them...")
     for each in lib:
-        response = os.system('{} -m pip install -U '.format(sys.executable) + each + " -q")
+        response = os.system('"{}" -m pip install -U '.format(sys.executable) + each + " -q")
         if response != 0:
             sys.exit("Couldn't install " + each)
     print("Successfully installed libraries.")
